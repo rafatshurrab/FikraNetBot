@@ -18,8 +18,8 @@ def run_web_server():
     server.serve_forever()
 
 # --- 2. الإعدادات الشخصية ---
-TOKEN = '8229979144:AAGJUdqyt9EiZmB3wauIZ4PwOZwaHJJrczk' # التوكن الجديد
-MY_CHAT_ID = 180270007 # معرف الآدمن الخاص بك
+TOKEN = '8229979144:AAGJUdqyt9EiZmB3wauIZ4PwOZwaHJJrczk' 
+MY_CHAT_ID = 180270007 
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
@@ -91,55 +91,3 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     elif query.data.startswith('admin_reply_'):
         data_parts = query.data.split('_')
-        target_user_id = data_parts[2]
-        reply_type = data_parts[3]
-        context.user_data['reply_to_user'] = target_user_id
-        context.user_data['reply_type_label'] = reply_type
-        dept_name = "💰 قسم المبيعات" if reply_type == 'sales' else "🛠️ الدعم الفني"
-        await context.bot.send_message(chat_id=MY_CHAT_ID, text=f"📝 اكتب الآن الرد المطلوب إرساله من {dept_name}:")
-
-    elif query.data == 'agent':
-        await query.message.reply_text("👨‍💻 للتواصل المباشر مع مسؤول الشبكة: @rytoo")
-
-async def handle_uploads(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = update.effective_user
-    
-    if update.effective_chat.id == MY_CHAT_ID and 'reply_to_user' in context.user_data:
-        target_id = context.user_data.pop('reply_to_user')
-        dept_type = context.user_data.pop('reply_type_label', 'sales')
-        label = "💰 قسم المبيعات" if dept_type == 'sales' else "🛠️ الدعم الفني"
-        admin_text = update.message.text
-        await context.bot.send_message(chat_id=target_id, text=f"🔔 **رسالة من {label}:**\n\n{admin_text}", parse_mode='Markdown')
-        await update.message.reply_text(f"✅ تم إرسال الرد باسم {label}.")
-        return
-
-    if update.message.text and context.user_data.get('waiting_for_card_check'):
-        card_num = update.message.text
-        context.user_data['waiting_for_card_check'] = False
-        await update.message.reply_text("⏳ تم استلام الرقم، جاري الفحص من قبل الدعم الفني...")
-        keyboard = [[InlineKeyboardButton("إرسال نتيجة الفحص 🛠️", callback_data=f"admin_reply_{user.id}_tech")]]
-        await context.bot.send_message(chat_id=MY_CHAT_ID, text=f"🔍 **طلب فحص فني:**\n👤 المستخدم: @{user.username}\n🔢 الرقم: `{card_num}`", reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='Markdown')
-        return
-
-    if update.message.photo:
-        order = context.user_data.get('current_order', 'طلب عام')
-        await update.message.reply_text("📥 استلمنا الوصل، سيقوم قسم المبيعات بالرد عليك فور التأكد.")
-        keyboard = [[InlineKeyboardButton("إرسال بيانات التفعيل 💰", callback_data=f"admin_reply_{user.id}_sales")]]
-        caption = f"🔔 **طلب مبيعات جديد:**\n👤 المستخدم: @{user.username}\n📦 الخدمة: {order}"
-        await context.bot.send_photo(chat_id=MY_CHAT_ID, photo=update.message.photo[-1].file_id, caption=caption, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='Markdown')
-
-# --- 4. تشغيل البوت ---
-def main():
-    # تشغيل السيرفر الوهمي في الخلفية لإبقاء Render مستيقظاً
-    threading.Thread(target=run_web_server, daemon=True).start()
-    
-    app = Application.builder().token(TOKEN).build()
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CallbackQueryHandler(handle_choice))
-    app.add_handler(MessageHandler(filters.PHOTO | filters.TEXT, handle_uploads))
-    
-    print("🚀 البوت يعمل الآن بنظام المبيعات والدعم الفني المزدوج...")
-    app.run_polling()
-
-if __name__ == '__main__':
-    main()
