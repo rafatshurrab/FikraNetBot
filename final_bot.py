@@ -4,25 +4,22 @@ import threading
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
-# --- كود الخدعة لإبقاء السيرفر يعمل على Render وتجنب الـ Timeout ---
+# --- كود لتجنب إغلاق Render للبوت (Port Binding) ---
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
-        self.wfile.write(b'FikraNet Bot is Running!')
+        self.wfile.write(b'FikraNet Bot is Active!')
 
 def run_web_server():
-    # Render يمرر المنفذ عبر متغير PORT تلقائياً
     port = int(os.environ.get("PORT", 8080))
     server = HTTPServer(('0.0.0.0', port), SimpleHTTPRequestHandler)
-    print(f"Web server started on port {port}")
     server.serve_forever()
 
-# --- إعداد رسالة الترحيب المختصرة لشبكة فكرة ---
+# --- رسالة الترحيب المختصرة ---
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = (
         "أهلاً بك في بوت خدمات شبكة فكرة للإنترنت الذكي! 🌐\n\n"
-        "نسهل عليك الحصول على خدماتنا بسرعة واحترافية:\n\n"
         "• اشتراكات شهرية 👤\n"
         "• بطاقات إنترنت 💳\n"
         "• بطاقات VIP 🚀\n"
@@ -33,16 +30,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(msg)
 
 def main():
-    # 1. تشغيل سيرفر ويب صغير في الخلفية لإرضاء منصة Render
+    # تشغيل السيرفر الوهمي في الخلفية لإرضاء Render
     threading.Thread(target=run_web_server, daemon=True).start()
     
-    # 2. تشغيل البوت باستخدام التوكن الخاص بك
-    # التوكن مستخرج من سجلاتك: 8229979144:AAHfkYDhzu86Tch677T_5woezpDek43jEw
+    # تشغيل البوت بالتوكن الخاص بك
     TOKEN = "8229979144:AAHfkYDhzu86Tch677T_5woezpDek43jEw"
-    
     app = Application.builder().token(TOKEN).build()
-    
-    # إضافة أمر البداية
     app.add_handler(CommandHandler("start", start))
     
     print("Bot is starting...")
