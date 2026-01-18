@@ -4,7 +4,7 @@ import threading
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
-# --- كود لمنع Render من إغلاق البوت (Web Server) ---
+# --- كود لتجنب إغلاق Render للبوت (Web Server) ---
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
@@ -12,10 +12,9 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(b'FikraNet Bot is Active!')
 
 def run_web_server():
-    # Render يمرر المنفذ عبر متغير PORT تلقائياً
+    # Render يمرر المنفذ عبر PORT تلقائياً
     port = int(os.environ.get("PORT", 8080))
     server = HTTPServer(('0.0.0.0', port), SimpleHTTPRequestHandler)
-    print(f"Web server started on port {port}")
     server.serve_forever()
 
 # --- رسالة الترحيب المختصرة لشبكة فكرة ---
@@ -35,13 +34,13 @@ def main():
     # 1. تشغيل السيرفر في الخلفية لإرضاء Render ومنع الـ Timeout
     threading.Thread(target=run_web_server, daemon=True).start()
     
-    # 2. توكن بوتك الخاص
-    TOKEN = "8229979144:AAHfkYDhzu86Tch677T_5woezpDek43jEw"
+    # 2. التوكن الجديد الذي أرسلته أنت الآن
+    TOKEN = "8229979144:AAGJUdqyt9EiZmB3wauIZ4PwOZwaHJJrczk"
     
     app = Application.builder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     
-    print("Bot is starting...")
+    print("Bot is starting with new token...")
     app.run_polling()
 
 if __name__ == '__main__':
