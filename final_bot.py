@@ -15,6 +15,7 @@ def run_web_server():
     # Render يمرر المنفذ عبر متغير PORT تلقائياً
     port = int(os.environ.get("PORT", 8080))
     server = HTTPServer(('0.0.0.0', port), SimpleHTTPRequestHandler)
+    print(f"Web server started on port {port}")
     server.serve_forever()
 
 # --- رسالة الترحيب المختصرة لشبكة فكرة ---
@@ -34,7 +35,7 @@ def main():
     # 1. تشغيل السيرفر في الخلفية لإرضاء Render ومنع الـ Timeout
     threading.Thread(target=run_web_server, daemon=True).start()
     
-    # 2. توكن بوتك الخاص (المستخرج من سجلاتك)
+    # 2. توكن بوتك الخاص
     TOKEN = "8229979144:AAHfkYDhzu86Tch677T_5woezpDek43jEw"
     
     app = Application.builder().token(TOKEN).build()
